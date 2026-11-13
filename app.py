@@ -158,9 +158,12 @@ st.markdown(f"<h1 style='text-align: center; color: #00ffcc;'>🛡️ KAVACH AGI
 st.markdown(f"<p style='text-align: center; color: #8b949e;'>Active Node: <b>{current_device}</b> | Status: <span style='color: #00ffcc;'>Online 🟢</span></p>", unsafe_allow_html=True)
 st.markdown("---")
 
-uploaded_file = st.file_uploader("📷 Upload Visual Feed (Optional):", type=["jpg", "jpeg", "png"])
-user_command = st.text_input("💬 Enter Command or Query:")
-
+    col_file, col_text = st.columns([1, 4])
+    with col_file:
+        uploaded_file = st.file_uploader("📎", type=["jpg", "jpeg", "png", "pdf", "txt"], label_visibility="collapsed")
+    with col_text:
+        user_command = st.text_input("💬", placeholder="Message Kavach...", label_visibility="collapsed")
+        
 if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
     prompt_text = user_command if user_command else "Is image ko analyze karke batao kya hai."
     
