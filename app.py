@@ -162,8 +162,7 @@ st.markdown("---")
     with col_file:
         uploaded_file = st.file_uploader("📎", type=["jpg", "jpeg", "png", "pdf", "txt"], label_visibility="collapsed")
     with col_text:
-        user_command = st.text_input("💬", placeholder="Message Kavach...", label_visibility="collapsed")
-        
+        user_command = st.text_input("💬", placeholder="Message Kavach...", label_visibility="collapsed") 
 if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
     prompt_text = user_command if user_command else "Is image ko analyze karke batao kya hai."
     
