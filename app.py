@@ -56,8 +56,8 @@ def think(prompt, uploaded_file=None):
             encoded_image = base64.b64encode(image_bytes).decode('utf-8')
             mime_type = uploaded_file.type
             parts.append({
-                "inline_data": {
-                    "mime_type": mime_type,
+                "inlineData": {
+                    "mimeType": mime_type,
                     "data": encoded_image
                 }
             })
@@ -126,4 +126,4 @@ if st.button("Execute") and (user_command or uploaded_file):
             st.write("---")
             st.write(f"**AGI:** {ai_thought}")
             st.warning("Aawaz me dikkat aayi, par text aa gaya hai.")
-    
+            
