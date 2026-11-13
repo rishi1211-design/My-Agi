@@ -5,7 +5,7 @@ import edge_tts
 
 # --- APNI API KEYS YAHAN DAALEIN ---
 GEMINI_API_KEY = "AQ.Ab8RN6IDI5_9qub-AQn_685wgpvWi3DhpgXUYAvsSDwGU7UkZA"
-GROQ_API_KEY = "Gsk_LLkK6zHnboWjryi5waJaWGdyb3FYettGgqnAvVDBUNrKbT9bHAbi"
+GROQ_API_KEY = "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"
 
 # --- CLOUD MEMORY (SUPABASE) ---
 SUPABASE_URL = "https://oeamiykxvmmdkbrplqwr.supabase.co"
