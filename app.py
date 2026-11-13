@@ -104,12 +104,13 @@ def think(prompt, uploaded_file=None, audio_file_obj=None, mode="💬 General In
     except Exception as e:
         return f"Error: {str(e)}"
 
-# --- ELEVENLABS AI VOICE ENGINE ---
+# --- ELEVENLABS AI VOICE ENGINE (WITH ERROR DEBUGGING) ---
 def generate_elevenlabs_audio(text, filename="response.mp3"):
     if not ELEVENLABS_API_KEY:
+        st.error("ElevenLabs API Key missing in Secrets!")
         return None
-    # Adam Voice ID in ElevenLabs
-    voice_id = "21m00Tcm4TlvDq8ikWAM"
+    
+    voice_id = "21m00Tcm4TlvDq8ikWAM"  # Adam Voice ID
     url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
     
     headers = {
@@ -133,9 +134,12 @@ def generate_elevenlabs_audio(text, filename="response.mp3"):
             with open(filename, "wb") as f:
                 f.write(response.content)
             return filename
-    except:
-        pass
-    return None
+        else:
+            st.error(f"ElevenLabs API Error ({response.status_code}): {response.text}")
+            return None
+    except Exception as e:
+        st.error(f"Audio Generation Exception: {str(e)}")
+        return None
 
 st.set_page_config(page_title="Kavach AGI", page_icon="🛡️", layout="centered")
 
@@ -284,4 +288,4 @@ if st.button("⚡ EXECUTE COMMAND") or voice_input is not None:
             </div>
             """, unsafe_allow_html=True)
             st.warning("Audio synthesis completed, text output displayed successfully.")
-            
+
