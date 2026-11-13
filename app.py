@@ -7,7 +7,7 @@ GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
 GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 SUPABASE_URL = st.secrets["SUPABASE_URL"]
 SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
-ELEVENLABS_API_KEY = st.secrets.get("ELEVENLABS_API_KEY", "")
+ELEVENLABS_API_KEY = st.secrets.get("ELEVENLABS_API_KEY", "").strip()
 
 def sync_memory(user_text, ai_text):
     headers = {
@@ -104,10 +104,9 @@ def think(prompt, uploaded_file=None, audio_file_obj=None, mode="💬 General In
     except Exception as e:
         return f"Error: {str(e)}"
 
-# --- ELEVENLABS AI VOICE ENGINE (WITH ERROR DEBUGGING) ---
+# --- ELEVENLABS AI VOICE ENGINE (ROBUST & CLEAN) ---
 def generate_elevenlabs_audio(text, filename="response.mp3"):
     if not ELEVENLABS_API_KEY:
-        st.error("ElevenLabs API Key missing in Secrets!")
         return None
     
     voice_id = "21m00Tcm4TlvDq8ikWAM"  # Adam Voice ID
@@ -134,12 +133,9 @@ def generate_elevenlabs_audio(text, filename="response.mp3"):
             with open(filename, "wb") as f:
                 f.write(response.content)
             return filename
-        else:
-            st.error(f"ElevenLabs API Error ({response.status_code}): {response.text}")
-            return None
-    except Exception as e:
-        st.error(f"Audio Generation Exception: {str(e)}")
-        return None
+    except:
+        pass
+    return None
 
 st.set_page_config(page_title="Kavach AGI", page_icon="🛡️", layout="centered")
 
@@ -215,7 +211,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BOOT ANIMATION & ELEVENLABS GREETING ON FIRST LOAD ---
+# --- BOOT ANIMATION & GREETING ON FIRST LOAD ---
 if 'booted' not in st.session_state:
     st.session_state.booted = True
     try:
@@ -267,11 +263,12 @@ if st.button("⚡ EXECUTE COMMAND") or voice_input is not None:
         
     sync_memory(prompt_text, ai_thought)
     
-    with st.spinner("🎙️ Synthesizing ElevenLabs Neural Voice..."):
+    with st.spinner("🎙️ Synthesizing Neural Voice Response..."):
         try:
             audio_file = generate_elevenlabs_audio(ai_thought, "response.mp3")
             st.markdown(f"""
             <div class="chat-card" style="text-align: center;">
+                <div class="ai-agent">🛡️</div>
                 <div class="ai-avatar">🛡️</div>
                 <p style="color: #8b949e; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;"><b>Kavach Neural Voice Node ({ai_mode})</b></p>
                 <p style="font-size: 1.2em; color: #ffffff; text-align: left; margin-top: 15px;">{ai_thought}</p>
@@ -287,5 +284,4 @@ if st.button("⚡ EXECUTE COMMAND") or voice_input is not None:
                 <p style="font-size: 1.2em; color: #ffffff; text-align: left; margin-top: 15px;">{ai_thought}</p>
             </div>
             """, unsafe_allow_html=True)
-            st.warning("Audio synthesis completed, text output displayed successfully.")
-
+            st.warning("Text output displayed successfully.")
