@@ -61,14 +61,14 @@ def think(prompt):
         raise Exception("Gemini Fail")
     except:
         try:
-            # Dusra Dimaag (Fallback): Groq ka purana aur sahi model
+            # Dusra Dimaag (Fallback): Mixtral (Groq ka Free & Active Model)
             url = "https://api.groq.com/openai/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {GROQ_API_KEY}",
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": "llama3-8b-8192",  # Yahan sahi model wapas daal diya hai
+                "model": "mixtral-8x7b-32768",  # NAYA MODEL YAHAN HAI
                 "messages": [{"role": "user", "content": prompt}]
             }
             res = requests.post(url, headers=headers, json=payload)
