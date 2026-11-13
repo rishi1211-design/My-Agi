@@ -48,9 +48,19 @@ def set_device(device_name):
     except:
         pass
 
-def think(prompt, uploaded_file=None):
+def think(prompt, uploaded_file=None, mode="💬 General Intelligence"):
     try:
-        parts = [{"text": prompt if prompt else "Is image ko analyze karo:"}]
+        prefix = ""
+        if "Image Generation" in mode:
+            prefix = "Generate detailed image concept for: "
+        elif "Code & Canvas" in mode:
+            prefix = "Provide clean code implementation for: "
+        elif "File Analysis" in mode:
+            prefix = "Analyze the uploaded file data thoroughly: "
+            
+        full_prompt = prefix + prompt if prompt else prefix + "Is data ko analyze karo:"
+
+        parts = [{"text": full_prompt}]
         if uploaded_file is not None:
             image_bytes = uploaded_file.getvalue()
             encoded_image = base64.b64encode(image_bytes).decode('utf-8')
@@ -75,7 +85,7 @@ def think(prompt, uploaded_file=None):
         }
         payload_groq = {
             "model": "openai/gpt-oss-120b",
-            "messages": [{"role": "user", "content": prompt}]
+            "messages": [{"role": "user", "content": full_prompt}]
         }
         res_groq = requests.post(url_groq, headers=headers_groq, json=payload_groq)
         if res_groq.status_code == 200:
@@ -101,6 +111,12 @@ st.markdown("""
         color: #00ffcc;
     }
     .stTextInput input {
+        background-color: #1a1c23;
+        color: #ffffff;
+        border: 1px solid #00ffcc;
+        border-radius: 8px;
+    }
+    .stSelectbox div[data-baseweb="select"] {
         background-color: #1a1c23;
         color: #ffffff;
         border: 1px solid #00ffcc;
@@ -158,14 +174,22 @@ st.markdown(f"<h1 style='text-align: center; color: #00ffcc;'>🛡️ KAVACH AGI
 st.markdown(f"<p style='text-align: center; color: #8b949e;'>Active Node: <b>{current_device}</b> | Status: <span style='color: #00ffcc;'>Online 🟢</span></p>", unsafe_allow_html=True)
 st.markdown("---")
 
-    col_file, col_text = st.columns([1, 4])
+# --- FEATURE MODE SELECTOR ---
+ai_mode = st.selectbox(
+    "Kavach Capability Mode:",
+    ["💬 General Intelligence", "🎨 Image Generation", "💻 Code & Canvas", "📁 File Analysis"],
+    label_visibility="collapsed"
+)
+
+# --- COMPACT CHAT INPUT BAR ---
+col_file, col_text = st.columns([1, 4])
 with col_file:
     uploaded_file = st.file_uploader("📎", type=["jpg", "jpeg", "png", "pdf", "txt"], label_visibility="collapsed")
 with col_text:
     user_command = st.text_input("💬", placeholder="Message Kavach...", label_visibility="collapsed")
-    
+
 if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
-    prompt_text = user_command if user_command else "Is image ko analyze karke batao kya hai."
+    prompt_text = user_command if user_command else "Is data ko analyze karke batao kya hai."
     
     if "tv par aao" in prompt_text.lower():
         set_device("TV")
@@ -173,7 +197,7 @@ if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
         st.stop()
         
     with st.spinner("🧠 Processing via Multi-Brain Neural Network..."):
-        ai_thought = think(prompt_text, uploaded_file)
+        ai_thought = think(prompt_text, uploaded_file, ai_mode)
         
     sync_memory(prompt_text, ai_thought)
     
@@ -183,7 +207,7 @@ if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
             st.markdown(f"""
             <div class="chat-card" style="text-align: center;">
                 <div class="ai-avatar">🛡️</div>
-                <p style="color: #8b949e; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;"><b>Kavach Neural Voice Node</b></p>
+                <p style="color: #8b949e; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;"><b>Kavach Neural Voice Node ({ai_mode})</b></p>
                 <p style="font-size: 1.2em; color: #ffffff; text-align: left; margin-top: 15px;">{ai_thought}</p>
             </div>
             """, unsafe_allow_html=True)
@@ -192,9 +216,9 @@ if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
             st.markdown(f"""
             <div class="chat-card" style="text-align: center;">
                 <div class="ai-avatar">🛡️</div>
-                <p style="color: #8b949e; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;"><b>Kavach Neural Voice Node</b></p>
+                <p style="color: #8b949e; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;"><b>Kavach Neural Voice Node ({ai_mode})</b></p>
                 <p style="font-size: 1.2em; color: #ffffff; text-align: left; margin-top: 15px;">{ai_thought}</p>
             </div>
             """, unsafe_allow_html=True)
             st.warning("Audio generation encountered an issue, text output displayed successfully.")
-    
+            
