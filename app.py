@@ -159,10 +159,11 @@ st.markdown(f"<p style='text-align: center; color: #8b949e;'>Active Node: <b>{cu
 st.markdown("---")
 
     col_file, col_text = st.columns([1, 4])
-    with col_file:
-        uploaded_file = st.file_uploader("📎", type=["jpg", "jpeg", "png", "pdf", "txt"], label_visibility="collapsed")
-    with col_text:
-        user_command = st.text_input("💬", placeholder="Message Kavach...", label_visibility="collapsed") 
+with col_file:
+    uploaded_file = st.file_uploader("📎", type=["jpg", "jpeg", "png", "pdf", "txt"], label_visibility="collapsed")
+with col_text:
+    user_command = st.text_input("💬", placeholder="Message Kavach...", label_visibility="collapsed")
+    
 if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
     prompt_text = user_command if user_command else "Is image ko analyze karke batao kya hai."
     
