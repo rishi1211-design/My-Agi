@@ -3,11 +3,9 @@ import requests
 import asyncio
 import edge_tts
 
-# --- APNI API KEYS YAHAN DAALEIN ---
 GEMINI_API_KEY = "AQ.Ab8RN6IDI5_9qub-AQn_685wgpvWi3DhpgXUYAvsSDwGU7UkZA"
 GROQ_API_KEY = "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"
 
-# --- CLOUD MEMORY (SUPABASE) ---
 SUPABASE_URL = "https://oeamiykxvmmdkbrplqwr.supabase.co"
 SUPABASE_KEY = "Sb_publishable_jlilReMVuIpS9SCULlKGtw_wK9R0xqE"
 
@@ -49,10 +47,8 @@ def set_device(device_name):
     except:
         pass
 
-# --- MULTI-BRAIN (GEMINI + GROQ) ---
 def think(prompt):
     try:
-        # Pehla Dimaag: Gemini 3.8 Flash
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={GEMINI_API_KEY}"
         payload = {"contents": [{"parts": [{"text": prompt}]}]}
         res = requests.post(url, json=payload)
@@ -61,14 +57,13 @@ def think(prompt):
         raise Exception("Gemini Fail")
     except:
         try:
-            # Dusra Dimaag (Fallback): Mixtral (Groq ka Free & Active Model)
             url = "https://api.groq.com/openai/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {GROQ_API_KEY}",
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": "mixtral-8x7b-32768",  # NAYA MODEL YAHAN HAI
+                "model": "openai/gpt-oss-120b",
                 "messages": [{"role": "user", "content": prompt}]
             }
             res = requests.post(url, headers=headers, json=payload)
@@ -78,7 +73,6 @@ def think(prompt):
         except Exception as e:
             return "Dono API fail ho gayi. Keys check karo."
 
-# --- VOICE GENERATION (FREE UNLIMITED) ---
 async def generate_audio_async(text):
     communicate = edge_tts.Communicate(text, "hi-IN-MadhurNeural")
     await communicate.save("response.mp3")
@@ -87,7 +81,6 @@ def generate_avatar(text):
     asyncio.run(generate_audio_async(text))
     return "response.mp3"
 
-# --- MAIN APP UI ---
 st.set_page_config(page_title="My AGI", layout="centered")
 
 current_device = check_device()
@@ -97,7 +90,6 @@ user_command = st.text_input("Mujhe command do (Jaise: 'tv par aao' ya koi sawal
 
 if st.button("Execute") and user_command:
     
-    # Device switch ke liye exact match
     if "tv par aao" in user_command.lower():
         set_device("TV")
         st.success("TV par switch ho raha hai...")
