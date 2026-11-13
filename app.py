@@ -52,25 +52,29 @@ def set_device(device_name):
 # --- MULTI-BRAIN (GEMINI + GROQ) ---
 def think(prompt):
     try:
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
+        # Naya Gemini 3.8 Flash model
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={GEMINI_API_KEY}"
         payload = {"contents": [{"parts": [{"text": prompt}]}]}
         res = requests.post(url, json=payload)
         if res.status_code == 200:
             return res.json()['candidates'][0]['content']['parts'][0]['text']
-        raise Exception("Gemini Limit Reached")
+        raise Exception("Gemini Limit Reached ya Fail")
     except:
         try:
+            # Naya Groq Llama 3.1 model (Fallback)
             url = "https://api.groq.com/openai/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {GROQ_API_KEY}",
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": "llama3-8b-8192",
+                "model": "llama-3.1-8b-instant",
                 "messages": [{"role": "user", "content": prompt}]
             }
             res = requests.post(url, headers=headers, json=payload)
-            return res.json()['choices'][0]['message']['content']
+            if res.status_code == 200:
+                return res.json()['choices'][0]['message']['content']
+            return f"Groq Error: {res.text}" 
         except Exception as e:
             return "Dono API fail ho gayi. Keys check karo."
 
@@ -104,9 +108,13 @@ if st.button("Execute") and user_command:
     sync_memory(user_command, ai_thought)
     
     with st.spinner("Aawaz generate kar raha hoon..."):
-        audio_file = generate_avatar(ai_thought)
-    
-    st.write("---")
-    st.write(f"**AGI:** {ai_thought}")
-    st.audio(audio_file, format="audio/mp3", autoplay=True)
-  
+        try:
+            audio_file = generate_avatar(ai_thought)
+            st.write("---")
+            st.write(f"**AGI:** {ai_thought}")
+            st.audio(audio_file, format="audio/mp3", autoplay=True)
+        except:
+            st.write("---")
+            st.write(f"**AGI:** {ai_thought}")
+            st.warning("Aawaz me dikkat aayi, par text aa gaya hai.")
+            
