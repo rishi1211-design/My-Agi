@@ -4,11 +4,11 @@ import asyncio
 import edge_tts
 import base64
 
-GEMINI_API_KEY = "AQ.Ab8RN6IDI5_9qub-AQn_685wgpvWi3DhpgXUYAvsSDwGU7UkZA"
-GROQ_API_KEY = "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"
-
-SUPABASE_URL = "https://oeamiykxvmmdkbrplqwr.supabase.co"
-SUPABASE_KEY = "Sb_publishable_jlilReMVuIpS9SCULlKGtw_wK9R0xqE"
+# --- SECURE CREDENTIALS (VIA STREAMLIT SECRETS) ---
+GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
+GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
 def sync_memory(user_text, ai_text):
     headers = {
