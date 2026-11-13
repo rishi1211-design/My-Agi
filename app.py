@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 import base64
+import asyncio
+import edge_tts
 
 # --- SECURE CREDENTIALS (VIA STREAMLIT SECRETS) ---
 GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -104,38 +106,42 @@ def think(prompt, uploaded_file=None, audio_file_obj=None, mode="💬 General In
     except Exception as e:
         return f"Error: {str(e)}"
 
-# --- ELEVENLABS AI VOICE ENGINE (ROBUST & CLEAN) ---
-def generate_elevenlabs_audio(text, filename="response.mp3"):
-    if not ELEVENLABS_API_KEY:
-        return None
-    
-    voice_id = "21m00Tcm4TlvDq8ikWAM"  # Adam Voice ID
-    url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
-    
-    headers = {
-        "Accept": "audio/mpeg",
-        "Content-Type": "application/json",
-        "xi-api-key": ELEVENLABS_API_KEY
-    }
-    
-    payload = {
-        "text": text,
-        "model_id": "eleven_multilingual_v2",
-        "voice_settings": {
-            "stability": 0.5,
-            "similarity_boost": 0.75
+# --- SMART AUDIO ENGINE (ELEVENLABS + EDGE-TTS FALLBACK) ---
+async def generate_audio_async(text, filename="response.mp3"):
+    # Try ElevenLabs first if key is provided
+    if ELEVENLABS_API_KEY:
+        voice_id = "21m00Tcm4TlvDq8ikWAM"  # Adam Voice ID
+        url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+        headers = {
+            "Accept": "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": ELEVENLABS_API_KEY
         }
-    }
-    
+        payload = {
+            "text": text,
+            "model_id": "eleven_multilingual_v2",
+            "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}
+        }
+        try:
+            response = requests.post(url, json=payload, headers=headers)
+            if response.status_code == 200:
+                with open(filename, "wb") as f:
+                    f.write(response.content)
+                return filename
+        except:
+            pass
+
+    # Fallback to Edge-TTS if ElevenLabs fails
     try:
-        response = requests.post(url, json=payload, headers=headers)
-        if response.status_code == 200:
-            with open(filename, "wb") as f:
-                f.write(response.content)
-            return filename
+        communicate = edge_tts.Communicate(text, "hi-IN-MadhurNeural")
+        await communicate.save(filename)
+        return filename
     except:
         pass
     return None
+
+def generate_avatar(text, filename="response.mp3"):
+    return asyncio.run(generate_audio_async(text, filename))
 
 st.set_page_config(page_title="Kavach AGI", page_icon="🛡️", layout="centered")
 
@@ -211,11 +217,11 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- BOOT ANIMATION & GREETING ON FIRST LOAD ---
+# --- BOOT ANIMATION & AUDIO GREETING ON FIRST LOAD ---
 if 'booted' not in st.session_state:
     st.session_state.booted = True
     try:
-        boot_audio = generate_elevenlabs_audio("Kavach AI assistant online. All neural security protocols activated.", "boot.mp3")
+        boot_audio = generate_avatar("Kavach AI assistant online. All neural security protocols activated.", "boot.mp3")
         if boot_audio:
             st.audio(boot_audio, format="audio/mp3", autoplay=True)
     except:
@@ -263,12 +269,11 @@ if st.button("⚡ EXECUTE COMMAND") or voice_input is not None:
         
     sync_memory(prompt_text, ai_thought)
     
-    with st.spinner("🎙️ Synthesizing Neural Voice Response..."):
+    with st.spinner("🎙️ Synthesizing Voice Response..."):
         try:
-            audio_file = generate_elevenlabs_audio(ai_thought, "response.mp3")
+            audio_file = generate_avatar(ai_thought, "response.mp3")
             st.markdown(f"""
             <div class="chat-card" style="text-align: center;">
-                <div class="ai-agent">🛡️</div>
                 <div class="ai-avatar">🛡️</div>
                 <p style="color: #8b949e; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;"><b>Kavach Neural Voice Node ({ai_mode})</b></p>
                 <p style="font-size: 1.2em; color: #ffffff; text-align: left; margin-top: 15px;">{ai_thought}</p>
@@ -285,3 +290,4 @@ if st.button("⚡ EXECUTE COMMAND") or voice_input is not None:
             </div>
             """, unsafe_allow_html=True)
             st.warning("Text output displayed successfully.")
+                
