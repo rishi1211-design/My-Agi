@@ -30,7 +30,7 @@ def check_device():
     try:
         res = requests.get(f"{SUPABASE_URL}/rest/v1/device_status?select=status&id=eq.1", headers=headers)
         if res.status_code == 200 and len(res.json()) > 0:
-            return res.json()[0]['status']
+            return res.json()['status']
     except:
         pass
     return "Mobile"
@@ -50,7 +50,6 @@ def set_device(device_name):
 
 def think(prompt, uploaded_file=None, mode="💬 General Intelligence"):
     try:
-        # Mode-wise expert system instructions
         system_instruction = "You are Kavach, an advanced AGI assistant."
         if "Image Generation" in mode:
             system_instruction = "You are an expert AI visual artist and prompt engineer. Describe the requested image concept in vivid detail, specifying lighting, style, colors, and composition."
@@ -95,13 +94,13 @@ def think(prompt, uploaded_file=None, mode="💬 General Intelligence"):
     except Exception as e:
         return f"Error: {str(e)}"
 
-async def generate_audio_async(text):
+async def generate_audio_async(text, filename="response.mp3"):
     communicate = edge_tts.Communicate(text, "hi-IN-MadhurNeural")
-    await communicate.save("response.mp3")
+    await communicate.save(filename)
 
-def generate_avatar(text):
-    asyncio.run(generate_audio_async(text))
-    return "response.mp3"
+def generate_avatar(text, filename="response.mp3"):
+    asyncio.run(generate_audio_async(text, filename))
+    return filename
 
 st.set_page_config(page_title="Kavach AGI", page_icon="🛡️", layout="centered")
 
@@ -145,8 +144,16 @@ st.markdown("""
         margin-top: 15px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
+    @keyframes boot-fade {
+        0% { opacity: 0; transform: scale(0.9); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    .boot-container {
+        animation: boot-fade 1.5s ease-in-out;
+        text-align: center;
+    }
     h1 {
-        text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        text-shadow: 0 0 15px rgba(0, 255, 204, 0.7);
     }
     @keyframes pulse-ring {
         0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 204, 0.7); }
@@ -169,9 +176,23 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# --- BOOT ANIMATION & SOUND ON FIRST LOAD ---
+if 'booted' not in st.session_state:
+    st.session_state.booted = True
+    try:
+        boot_audio = generate_avatar("Kavach system online. All security protocols and neural networks activated.", "boot.mp3")
+        st.audio(boot_audio, format="audio/mp3", autoplay=True)
+    except:
+        pass
+
 current_device = check_device()
 
-st.markdown(f"<h1 style='text-align: center; color: #00ffcc;'>🛡️ KAVACH AGI</h1>", unsafe_allow_html=True)
+st.markdown("""
+<div class="boot-container">
+    <h1 style='color: #00ffcc;'>🛡️ KAVACH AGI</h1>
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown(f"<p style='text-align: center; color: #8b949e;'>Active Node: <b>{current_device}</b> | Status: <span style='color: #00ffcc;'>Online 🟢</span></p>", unsafe_allow_html=True)
 st.markdown("---")
 
@@ -204,7 +225,7 @@ if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
     
     with st.spinner("🎙️ Synthesizing Voice Response..."):
         try:
-            audio_file = generate_avatar(ai_thought)
+            audio_file = generate_avatar(ai_thought, "response.mp3")
             st.markdown(f"""
             <div class="chat-card" style="text-align: center;">
                 <div class="ai-avatar">🛡️</div>
@@ -222,3 +243,4 @@ if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
             </div>
             """, unsafe_allow_html=True)
             st.warning("Audio generation encountered an issue, text output displayed successfully.")
+        
