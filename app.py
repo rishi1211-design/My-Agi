@@ -50,15 +50,16 @@ def set_device(device_name):
 
 def think(prompt, uploaded_file=None, mode="💬 General Intelligence"):
     try:
-        prefix = ""
+        # Mode-wise expert system instructions
+        system_instruction = "You are Kavach, an advanced AGI assistant."
         if "Image Generation" in mode:
-            prefix = "Generate detailed image concept for: "
+            system_instruction = "You are an expert AI visual artist and prompt engineer. Describe the requested image concept in vivid detail, specifying lighting, style, colors, and composition."
         elif "Code & Canvas" in mode:
-            prefix = "Provide clean code implementation for: "
+            system_instruction = "You are an elite software architect and coder. Provide clean, well-commented, production-ready code snippets with clear instructions."
         elif "File Analysis" in mode:
-            prefix = "Analyze the uploaded file data thoroughly: "
-            
-        full_prompt = prefix + prompt if prompt else prefix + "Is data ko analyze karo:"
+            system_instruction = "You are a data forensics expert. Analyze the provided data, document, or image deeply and provide clear insights and bullet points."
+
+        full_prompt = f"{system_instruction}\n\nUser Query: {prompt if prompt else 'Is data ko analyze karo.'}"
 
         parts = [{"text": full_prompt}]
         if uploaded_file is not None:
@@ -221,4 +222,3 @@ if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
             </div>
             """, unsafe_allow_html=True)
             st.warning("Audio generation encountered an issue, text output displayed successfully.")
-            
