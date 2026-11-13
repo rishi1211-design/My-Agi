@@ -1,8 +1,8 @@
-import asyncio
-import base64
-import edge_tts
-import requests
 import streamlit as st
+import requests
+import asyncio
+import edge_tts
+import base64
 
 GEMINI_API_KEY = "AQ.Ab8RN6IDI5_9qub-AQn_685wgpvWi3DhpgXUYAvsSDwGU7UkZA"
 GROQ_API_KEY = "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"
@@ -56,8 +56,8 @@ def think(prompt, uploaded_file=None):
             encoded_image = base64.b64encode(image_bytes).decode('utf-8')
             mime_type = uploaded_file.type
             parts.append({
-                "inlineData": {
-                    "mimeType": mime_type,
+                "inline_data": {
+                    "mime_type": mime_type,
                     "data": encoded_image
                 }
             })
@@ -67,24 +67,22 @@ def think(prompt, uploaded_file=None):
         res = requests.post(url, json=payload)
         if res.status_code == 200:
             return res.json()['candidates'][0]['content']['parts'][0]['text']
-        raise Exception("Gemini Fail")
-    except:
-        try:
-            url = "https://api.groq.com/openai/v1/chat/completions"
-            headers = {
-                "Authorization": f"Bearer {GROQ_API_KEY}",
-                "Content-Type": "application/json"
-            }
-            payload = {
-                "model": "openai/gpt-oss-120b",
-                "messages": [{"role": "user", "content": prompt}]
-            }
-            res = requests.post(url, headers=headers, json=payload)
-            if res.status_code == 200:
-                return res.json()['choices'][0]['message']['content']
-            return f"Groq Error: {res.text}" 
-        except Exception as e:
-            return "Dono API fail ho gayi. Keys check karo."
+        
+        url_groq = "https://api.groq.com/openai/v1/chat/completions"
+        headers_groq = {
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        payload_groq = {
+            "model": "openai/gpt-oss-120b",
+            "messages": [{"role": "user", "content": prompt}]
+        }
+        res_groq = requests.post(url_groq, headers=headers_groq, json=payload_groq)
+        if res_groq.status_code == 200:
+            return res_groq.json()['choices'][0]['message']['content']
+        return f"Gemini Error: {res.text}"
+    except Exception as e:
+        return f"Error: {str(e)}"
 
 async def generate_audio_async(text):
     communicate = edge_tts.Communicate(text, "hi-IN-MadhurNeural")
@@ -94,36 +92,90 @@ def generate_avatar(text):
     asyncio.run(generate_audio_async(text))
     return "response.mp3"
 
-st.set_page_config(page_title="My AGI", layout="centered")
+st.set_page_config(page_title="Kavach AGI", page_icon="🛡️", layout="centered")
+
+# --- CUSTOM FUTURISTIC CSS DESIGN ---
+st.markdown("""
+<style>
+    .main {
+        background-color: #0e1117;
+        color: #00ffcc;
+    }
+    .stTextInput input {
+        background-color: #1a1c23;
+        color: #ffffff;
+        border: 1px solid #00ffcc;
+        border-radius: 8px;
+    }
+    .stButton button {
+        background: linear-gradient(45deg, #00ffcc, #0077ff);
+        color: #000000;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        width: 100%;
+        padding: 0.5rem;
+        box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
+    }
+    .stButton button:hover {
+        background: linear-gradient(45deg, #0077ff, #00ffcc);
+        color: #ffffff;
+    }
+    .chat-card {
+        background-color: #161b22;
+        padding: 20px;
+        border-radius: 12px;
+        border-left: 5px solid #00ffcc;
+        margin-top: 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    h1 {
+        text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+    }
+</style>
+""", unsafe_allow_html=True)
 
 current_device = check_device()
-st.title(f"AGI Interface - Live on {current_device} 🌐")
 
-uploaded_file = st.file_uploader("Kavach ko koi photo/screenshot dikhayein (Optional):", type=["jpg", "jpeg", "png"])
+# Header Section
+st.markdown(f"<h1 style='text-align: center; color: #00ffcc;'>🛡️ KAVACH AGI</h1>", unsafe_allow_html=True)
+st.markdown(f"<p style='text-align: center; color: #8b949e;'>Active Node: <b>{current_device}</b> | Status: <span style='color: #00ffcc;'>Online 🟢</span></p>", unsafe_allow_html=True)
+st.markdown("---")
 
-user_command = st.text_input("Mujhe command do ya image ke baare me pucho (Jaise: 'tv par aao' ya 'is photo me kya hai'):")
+# Vision / File Upload Box
+uploaded_file = st.file_uploader("📷 Upload Visual Feed (Optional):", type=["jpg", "jpeg", "png"])
 
-if st.button("Execute") and (user_command or uploaded_file):
+# Command Input
+user_command = st.text_input("💬 Enter Command or Query:")
+
+if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
     prompt_text = user_command if user_command else "Is image ko analyze karke batao kya hai."
     
     if "tv par aao" in prompt_text.lower():
         set_device("TV")
-        st.success("TV par switch ho raha hai...")
+        st.success("🔄 Switching active stream to TV node...")
         st.stop()
         
-    with st.spinner("Soch raha hoon aur dekh raha hoon..."):
+    with st.spinner("🧠 Processing via Multi-Brain Neural Network..."):
         ai_thought = think(prompt_text, uploaded_file)
         
     sync_memory(prompt_text, ai_thought)
     
-    with st.spinner("Aawaz generate kar raha hoon..."):
+    with st.spinner("🎙️ Synthesizing Voice Response..."):
         try:
             audio_file = generate_avatar(ai_thought)
-            st.write("---")
-            st.write(f"**AGI:** {ai_thought}")
+            st.markdown(f"""
+            <div class="chat-card">
+                <p style="color: #8b949e; margin-bottom: 5px;"><b>KAVACH RESPONSE:</b></p>
+                <p style="font-size: 1.1em; color: #ffffff;">{ai_thought}</p>
+            </div>
+            """, unsafe_allow_html=True)
             st.audio(audio_file, format="audio/mp3", autoplay=True)
         except:
-            st.write("---")
-            st.write(f"**AGI:** {ai_thought}")
-            st.warning("Aawaz me dikkat aayi, par text aa gaya hai.")
-            
+            st.markdown(f"""
+            <div class="chat-card">
+                <p style="color: #8b949e; margin-bottom: 5px;"><b>KAVACH RESPONSE:</b></p>
+                <p style="font-size: 1.1em; color: #ffffff;">{ai_thought}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            st.warning("Audio generation encountered an issue, text output displayed successfully.")
