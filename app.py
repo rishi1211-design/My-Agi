@@ -94,7 +94,6 @@ def generate_avatar(text):
 
 st.set_page_config(page_title="Kavach AGI", page_icon="🛡️", layout="centered")
 
-# --- CUSTOM FUTURISTIC CSS DESIGN ---
 st.markdown("""
 <style>
     .main {
@@ -132,20 +131,34 @@ st.markdown("""
     h1 {
         text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
     }
+    @keyframes pulse-ring {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 204, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 15px rgba(0, 255, 204, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 204, 0); }
+    }
+    .ai-avatar {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 15px auto;
+        background: linear-gradient(135deg, #00ffcc, #0077ff);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        animation: pulse-ring 2s infinite;
+        box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+    }
 </style>
 """, unsafe_allow_html=True)
 
 current_device = check_device()
 
-# Header Section
 st.markdown(f"<h1 style='text-align: center; color: #00ffcc;'>🛡️ KAVACH AGI</h1>", unsafe_allow_html=True)
 st.markdown(f"<p style='text-align: center; color: #8b949e;'>Active Node: <b>{current_device}</b> | Status: <span style='color: #00ffcc;'>Online 🟢</span></p>", unsafe_allow_html=True)
 st.markdown("---")
 
-# Vision / File Upload Box
 uploaded_file = st.file_uploader("📷 Upload Visual Feed (Optional):", type=["jpg", "jpeg", "png"])
-
-# Command Input
 user_command = st.text_input("💬 Enter Command or Query:")
 
 if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
@@ -164,27 +177,7 @@ if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
     with st.spinner("🎙️ Synthesizing Voice Response..."):
         try:
             audio_file = generate_avatar(ai_thought)
-                        st.markdown(f"""
-            <style>
-                @keyframes pulse-ring {{
-                    0% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 204, 0.7); }}
-                    70% {{ transform: scale(1); box-shadow: 0 0 0 15px rgba(0, 255, 204, 0); }}
-                    100% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 204, 0); }}
-                }}
-                .ai-avatar {{
-                    width: 70px;
-                    height: 70px;
-                    margin: 0 auto 15px auto;
-                    background: linear-gradient(135deg, #00ffcc, #0077ff);
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 30px;
-                    animation: pulse-ring 2s infinite;
-                    box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
-                }}
-            </style>
+            st.markdown(f"""
             <div class="chat-card" style="text-align: center;">
                 <div class="ai-avatar">🛡️</div>
                 <p style="color: #8b949e; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;"><b>Kavach Neural Voice Node</b></p>
@@ -192,4 +185,13 @@ if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
             </div>
             """, unsafe_allow_html=True)
             st.audio(audio_file, format="audio/mp3", autoplay=True)
-            
+        except:
+            st.markdown(f"""
+            <div class="chat-card" style="text-align: center;">
+                <div class="ai-avatar">🛡️</div>
+                <p style="color: #8b949e; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;"><b>Kavach Neural Voice Node</b></p>
+                <p style="font-size: 1.2em; color: #ffffff; text-align: left; margin-top: 15px;">{ai_thought}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            st.warning("Audio generation encountered an issue, text output displayed successfully.")
+    
