@@ -164,18 +164,32 @@ if st.button("⚡ EXECUTE COMMAND") and (user_command or uploaded_file):
     with st.spinner("🎙️ Synthesizing Voice Response..."):
         try:
             audio_file = generate_avatar(ai_thought)
-            st.markdown(f"""
-            <div class="chat-card">
-                <p style="color: #8b949e; margin-bottom: 5px;"><b>KAVACH RESPONSE:</b></p>
-                <p style="font-size: 1.1em; color: #ffffff;">{ai_thought}</p>
+                        st.markdown(f"""
+            <style>
+                @keyframes pulse-ring {{
+                    0% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 204, 0.7); }}
+                    70% {{ transform: scale(1); box-shadow: 0 0 0 15px rgba(0, 255, 204, 0); }}
+                    100% {{ transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 204, 0); }}
+                }}
+                .ai-avatar {{
+                    width: 70px;
+                    height: 70px;
+                    margin: 0 auto 15px auto;
+                    background: linear-gradient(135deg, #00ffcc, #0077ff);
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 30px;
+                    animation: pulse-ring 2s infinite;
+                    box-shadow: 0 0 20px rgba(0, 255, 204, 0.5);
+                }}
+            </style>
+            <div class="chat-card" style="text-align: center;">
+                <div class="ai-avatar">🛡️</div>
+                <p style="color: #8b949e; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;"><b>Kavach Neural Voice Node</b></p>
+                <p style="font-size: 1.2em; color: #ffffff; text-align: left; margin-top: 15px;">{ai_thought}</p>
             </div>
             """, unsafe_allow_html=True)
             st.audio(audio_file, format="audio/mp3", autoplay=True)
-        except:
-            st.markdown(f"""
-            <div class="chat-card">
-                <p style="color: #8b949e; margin-bottom: 5px;"><b>KAVACH RESPONSE:</b></p>
-                <p style="font-size: 1.1em; color: #ffffff;">{ai_thought}</p>
-            </div>
-            """, unsafe_allow_html=True)
-            st.warning("Audio generation encountered an issue, text output displayed successfully.")
+            
