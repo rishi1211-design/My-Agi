@@ -52,23 +52,23 @@ def set_device(device_name):
 # --- MULTI-BRAIN (GEMINI + GROQ) ---
 def think(prompt):
     try:
-        # Naya Gemini 3.8 Flash model
+        # Pehla Dimaag: Gemini 3.8 Flash
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={GEMINI_API_KEY}"
         payload = {"contents": [{"parts": [{"text": prompt}]}]}
         res = requests.post(url, json=payload)
         if res.status_code == 200:
             return res.json()['candidates'][0]['content']['parts'][0]['text']
-        raise Exception("Gemini Limit Reached ya Fail")
+        raise Exception("Gemini Fail")
     except:
         try:
-            # Naya Groq Llama 3.1 model (Fallback)
+            # Dusra Dimaag (Fallback): Groq ka purana aur sahi model
             url = "https://api.groq.com/openai/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {GROQ_API_KEY}",
                 "Content-Type": "application/json"
             }
             payload = {
-                "model": "llama-3.1-8b-instant",
+                "model": "llama3-8b-8192",  # Yahan sahi model wapas daal diya hai
                 "messages": [{"role": "user", "content": prompt}]
             }
             res = requests.post(url, headers=headers, json=payload)
@@ -93,10 +93,11 @@ st.set_page_config(page_title="My AGI", layout="centered")
 current_device = check_device()
 st.title(f"AGI Interface - Live on {current_device} 🌐")
 
-user_command = st.text_input("Mujhe command do (Jaise: 'TV par aao' ya koi sawal):")
+user_command = st.text_input("Mujhe command do (Jaise: 'tv par aao' ya koi sawal):")
 
 if st.button("Execute") and user_command:
     
+    # Device switch ke liye exact match
     if "tv par aao" in user_command.lower():
         set_device("TV")
         st.success("TV par switch ho raha hai...")
